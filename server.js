@@ -9,9 +9,22 @@ connectDB();
 const app = express();
 
 app.use(cors({
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    origin: (origin, callback) => {
+        const allowed = [
+            process.env.CLIENT_URL,
+            'http://localhost:5173',
+            'http://localhost:3000',
+        ].filter(Boolean);
+
+        // Allow any vercel.app domain automatically
+        if (!origin || allowed.includes(origin) || /\.vercel\.app$/.test(origin)) {
+            return callback(null, true);
+        }
+        callback(new Error('Not allowed by CORS'));
+    },
     credentials: true,
 }));
+
 app.use(express.json());
 
 // Routes
